@@ -2,8 +2,10 @@
  * Created by Shirley on 3/2/16.
  */
 
-var sunrise, sunset, sunriseText, sunsetText, time, condition, code, morningLight, eveningLight,city,tempF,tempC, current,msg;
+var sunrise, sunset, sunriseText, sunsetText, time, condition, code, morningLight, eveningLight,city,tempF,tempC, current,msg,seaLevel;
+var drops = [];
 var isF = true;
+var isSnow = false;
 var timezone = -9;
 
 if ("geolocation" in navigator) {
@@ -64,12 +66,6 @@ $('#abu-dhabi').on('click', function() {
     console.log("city: " + city + " condition:" + condition);
 
 });
-
-
-
-
-
-
 
 $('#unit').on('click',function(){
     isF = !isF;
@@ -140,7 +136,6 @@ $.simpleWeather({
         sunsetText = weather.sunset;
         sunrise = convertTime(weather.sunrise);
         sunset = convertTime(weather.sunset);
-
     }
 });
 
@@ -167,10 +162,15 @@ function setup() {
     $("#skyline").height(0.75*windowHeight-0.66*size);
 
     bgImg = loadImage("images/background.jpg");
+    bgImgAlt = loadImage("images/background-alt.jpg");
     cloudImg = loadImage("images/cloud.png");
 
     morningLight=constrain(map(time, sunrise-3600,36000, 255, 0),0,220);
     eveningLight=constrain(map(time, 50400, sunset+3600, 0, 255),0,220);//bright hours:10-2pm
+
+    for(i=0; i<200;i++){
+        drops.push(new Drop());
+    }
 }
 
 function draw() {
@@ -191,17 +191,12 @@ function draw() {
     risePoint = width / 6;
     setPoint = width - risePoint;
     seaLevel = height / 4 * 3;
-    imageMode(CORNER);
-    background(bgImg);
     morningLight=constrain(map(time, sunrise-3600,36000, 255, 0),0,220);
     eveningLight=constrain(map(time, 50400, sunset+3600, 0, 255),0,220);
 
-    //drawCloud();
-    drawSun();
-
+    checkCondition(code);
 
     //lights
-
     noStroke();
     fill(0, 0, 0, morningLight);
     rect(0, 0, width, height);
@@ -267,36 +262,6 @@ function windowResized() {
     seaLevel = height / 3 * 2;
 }
 
-function drawSun(){
-    //sun
-    sunX = map(time, sunrise, sunset, risePoint, setPoint);
-    sunR = dist(risePoint, seaLevel, width / 2, seaLevel + height / width);
-    if(time<sunrise-600 || time>sunset+600){
-        sunY = -100;
-    }else {
-        sunY = seaLevel + height / width - sqrt(sq(sunR) - sq(sunX - width / 2));
-    }
-    noStroke();
-    fill(255,240,200, 100);
-    ellipse(sunX, sunY, size*1.3, size*1.3);
-    ellipse(sunX, sunY, size*1.7, size*1.7);
-    fill(255);
-    ellipse(sunX, sunY, size, size);
-    fill(255,51,0, eveningLight/2);
-    ellipse(sunX, sunY, size, size);
-}
-
-function drawCloud(){
-    //cloud
-    imageMode(CENTER);
-    if(width>height) {
-        image(cloudImg, width/2,seaLevel/3*2+30,width/1.3,seaLevel/3*2);
-    }else {
-
-        image(cloudImg, width/2,seaLevel/3*2+30,width,seaLevel/3*2);
-    }
-}
-
 function checkTime(i) {
     if (i < 10) {
         i = "0" + i
@@ -335,5 +300,126 @@ function resetAnimation(){
         time = sunrise-6000;
     }else{
         time=current;
+    }
+}
+
+function drawSun(){
+    //sun
+    sunX = map(time, sunrise, sunset, risePoint, setPoint);
+    sunR = dist(risePoint, seaLevel, width / 2, seaLevel + height / width);
+    if(time<sunrise-600 || time>sunset+600){
+        sunY = -100;
+    }else {
+        sunY = seaLevel + height / width - sqrt(sq(sunR) - sq(sunX - width / 2));
+    }
+    noStroke();
+    fill(255,240,200, 100);
+    ellipse(sunX, sunY, size*1.3, size*1.3);
+    ellipse(sunX, sunY, size*1.7, size*1.7);
+    fill(255);
+    ellipse(sunX, sunY, size, size);
+    fill(255,51,0, eveningLight/2);
+    ellipse(sunX, sunY, size, size);
+}
+
+function drawCloud(){
+    imageMode(CENTER);
+    if(width>height) {
+        image(cloudImg, width/2,seaLevel/3*2,width/1.3,seaLevel/3*2+30);
+    }else {
+        image(cloudImg, width/2,seaLevel/3*2+30,width,seaLevel/3*2);
+    }
+}
+
+
+function drawDrops(isSnow){
+    for (var i=0; i<drops.length; i++) {
+        drops[i].isSnow = isSnow;
+        drops[i].move();
+
+    }
+}
+
+
+function Drop() {
+    this.x = random(width/4,width/4*3);
+    this.y = random(height/3,height);
+    this.offset = random(-30,30);
+    this.opacity;
+    this.isSnow = true;
+    this.size = size/10+random(0, 2);
+    this.move = function() {
+        this.y += this.offset/20+4;
+        this.opacity = map(this.y,height/3,seaLevel,255,0)+this.offset;
+        if(this.y>height){
+            this.y=height/3+random(40,100);
+            this.x = random(width/4,width/4*3);
+        }
+        fill(255,this.opacity);
+        if(this.isSnow){
+            ellipse(this.x, this.y, this.size, this.size);
+        }else {
+            rect(this.x, this.y, 1,this.size*3);
+        }
+
+
+
+    };
+}
+
+function checkCondition(code){
+    imageMode(CORNER);
+    if(['31','32','33','34','36'].indexOf(code)>=0){
+        //clear
+        //clear bg
+        //draw sun
+        background(bgImg);
+        drawSun();
+    }else if(['26','27','28'].indexOf(code)>=0){
+        //heavy cloud
+        //alt bg
+        //draw cloud
+        //draw sun
+        background(bgImgAlt);
+        drawCloud();
+        drawSun();
+    }else if(['29','30','44'].indexOf(code)>=0){
+        //light cloudy
+        //clear bg
+        //draw cloud
+        //draw sun
+        background(bgImg);
+        drawCloud();
+        drawSun();
+    }else if( ['5','6','7','13','14','15','16','17','18','41','42','43','46','5','6','7','35'].indexOf(code)>=0){
+        //snow
+        //alt bg
+        //draw cloud
+        //draw sun
+        //draw snow
+        background(bgImgAlt);
+        drawCloud();
+        drawSun();
+        drawDrops(true);
+    }else if( ['19','20','21','22','23','24','25'].indexOf(code)>=0){
+        //foggy
+        //alt bg
+        //draw sun
+        background(bgImgAlt);
+        drawSun();
+
+    }else if(['0', '1', '2','3','4','8','9','10','11','12','37','38','38','39','40','45','47'].indexOf(code) >= 0){
+        //rain
+        //alt bg
+        //draw cloud
+        //draw sun
+        //draw rain
+        background(bgImgAlt);
+        drawCloud();
+        drawSun();
+        drawDrops(false);
+    }else {
+        background(bgImg);
+        drawSun();
     }
 }
