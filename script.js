@@ -2,8 +2,10 @@
  * Created by Shirley on 3/2/16.
  */
 
-var sunrise, sunset, sunriseText, sunsetText, time, condition, code, morningLight, eveningLight,city,tempF,tempC, current,msg,seaLevel;
+var sunrise, sunset, sunriseText, sunsetText, time, condition, code, morningLight,
+        eveningLight,city,tempF,tempC, current,msg,seaLevel,today,starDisplay;
 var drops = [];
+var stars = [];
 var isF = true;
 var isSnow = false;
 var timezone = -9;
@@ -11,7 +13,7 @@ var timezone = -9;
 if ("geolocation" in navigator) {
     $('#get-loc').show();
 } else {
-    $('#get-loc').hide();
+    $('#get-loc').css("opacity", 0);
 }
 
 $('#get-loc').on('click', function() {
@@ -24,8 +26,8 @@ $('#get-loc').on('click', function() {
     document.getElementById("condition").textContent = "Loading...";
     document.getElementById("location").textContent = "Loading...";
     setGreetings();
-
-    console.log("city: " + city + " condition:" + condition);
+    $('#get-loc').css("opacity", 0);
+    console.log("city: " + city + " condition:" + condition+ " code:" +code);
 });
 
 $('#shanghai').on('click', function() {
@@ -37,7 +39,8 @@ $('#shanghai').on('click', function() {
     document.getElementById("location").textContent = "Loading...";
     setGreetings();
     document.querySelector("#skyline img").src = "images/shanghai.png";
-    console.log("city: " + city + " condition:" + condition);
+    $('#get-loc').css("opacity", 1);
+    console.log("city: " + city + " condition:" + condition+ " code:" +code);
 
 });
 
@@ -49,8 +52,9 @@ $('#new-york').on('click', function() {
     document.getElementById("condition").textContent = "Loading...";
     document.getElementById("location").textContent = "Loading...";
     setGreetings();
-    document.querySelector("#skyline img").src = "images/newyork.png";
-    console.log("city: " + city + " condition:" + condition);
+    document.querySelector("#skyline img").src = "images/newyork2.png";
+    $('#get-loc').css("opacity", 1);
+    console.log("city: " + city + " condition:" + condition+ " code:" +code);
 
 });
 
@@ -62,8 +66,9 @@ $('#abu-dhabi').on('click', function() {
     document.getElementById("condition").textContent = "Loading...";
     document.getElementById("location").textContent = "Loading...";
     setGreetings();
-    document.querySelector("#skyline img").src = "images/abudhabi.png";
-    console.log("city: " + city + " condition:" + condition);
+    document.querySelector("#skyline img").src = "images/abudhabi2.png";
+    $('#get-loc').css("opacity", 1);
+    console.log("city: " + city + " condition:" + condition+ " code:" +code);
 
 });
 
@@ -85,6 +90,7 @@ function loadWeather(location, woeid) {
         woeid: woeid,
         unit: 'f',
         success: function (weather) {
+            today = weather.forecast[0].date;
             city = weather.city;
             condition = weather.currently;
             tempC = weather.alt.temp;
@@ -106,16 +112,16 @@ function loadWeather(location, woeid) {
             }
             switch (city){
                 case "Shanghai":
-                    document.querySelector("#skyline img").src = "images/shanghai.png";
+                    document.querySelector("#skyline img").src = "images/shanghai2.png";
                     break;
                 case "New York":
-                    document.querySelector("#skyline img").src = "images/newyork.png";
+                    document.querySelector("#skyline img").src = "images/newyork2.png";
                     break;
                 case "Abu Dhabi":
-                    document.querySelector("#skyline img").src = "images/abudhabi.png";
+                    document.querySelector("#skyline img").src = "images/abudhabi2.png";
                     break;
                 default:
-                    document.querySelector("#skyline img").src = "images/city.png";
+                    document.querySelector("#skyline img").src = "images/city2.png";
             }
         },
         error: function (error) {
@@ -127,6 +133,7 @@ $.simpleWeather({
     location: 'Tokyo',
     unit: 'f',
     success: function (weather) {
+        today = weather.forecast[0].date;
         city = weather.city;
         condition = weather.currently;
         tempC = weather.alt.temp;
@@ -159,7 +166,9 @@ function setup() {
     }else {
         size=windowWidth/15;
     }
-    $("#skyline").height(0.75*windowHeight-0.66*size);
+    seaLevel = windowHeight / 8 * 5;
+    $("#skyline").height(seaLevel-0.66*size);
+
 
     bgImg = loadImage("images/background.jpg");
     bgImgAlt = loadImage("images/background-alt.jpg");
@@ -167,9 +176,13 @@ function setup() {
 
     morningLight=constrain(map(time, sunrise-3600,36000, 255, 0),0,220);
     eveningLight=constrain(map(time, 50400, sunset+3600, 0, 255),0,220);//bright hours:10-2pm
+    starDisplay =constrain(map(sq(time/3600-12), 64, 16, 0, 255),0,255);
 
     for(i=0; i<200;i++){
         drops.push(new Drop());
+    }
+    for(i=0; i<100;i++){
+        stars.push(new Star());
     }
 }
 
@@ -178,6 +191,7 @@ function draw() {
     getHour();
     //wright time to page
     document.getElementById("time").textContent = checkTime(currentH)+":"+ checkTime(minute())+":"+ checkTime(second());
+    document.getElementById("date").textContent = today;
     //sun animation
     if(current<sunset && current>sunrise && time<current){
         time+=1600;
@@ -190,23 +204,13 @@ function draw() {
 
     risePoint = width / 6;
     setPoint = width - risePoint;
-    seaLevel = height / 4 * 3;
+    seaLevel = height / 8 * 5;
     morningLight=constrain(map(time, sunrise-3600,36000, 255, 0),0,220);
     eveningLight=constrain(map(time, 50400, sunset+3600, 0, 255),0,220);
+    starDisplay =constrain(map(sq(time/3600-12), 64, 16, 0, 255),0,255);
+
 
     checkCondition(code);
-
-    //lights
-    noStroke();
-    fill(0, 0, 0, morningLight);
-    rect(0, 0, width, height);
-    fill(0, 0, 0, eveningLight);
-    rect(0, 0, width, height);
-    fill(180, 0, 100, eveningLight/10);
-    rect(0, 0, width, height);
-    fill(0);
-    rect(0,seaLevel-0.66*size,width,height);
-
 
     //sunrise and sunset
     strokeWeight(1);
@@ -256,10 +260,10 @@ function windowResized() {
     }else {
         size=windowWidth/15;
     }
-    $("#skyline").height(0.75*windowHeight-0.66*size);
+    $("#skyline").height(seaLevel-0.66*size);
     risePoint = width / 6;
     setPoint = width - risePoint;
-    seaLevel = height / 3 * 2;
+    seaLevel = height / 8 * 5;
 }
 
 function checkTime(i) {
@@ -303,6 +307,19 @@ function resetAnimation(){
     }
 }
 
+function drawLights(){
+    //lights
+    noStroke();
+    fill(0, 0, 0, morningLight);
+    rect(0, 0, width, height);
+    fill(0, 0, 0, eveningLight);
+    rect(0, 0, width, height);
+    fill(180, 0, 100, eveningLight/10);
+    rect(0, 0, width, height);
+    fill(0);
+    rect(0,seaLevel-0.66*size,width,height);
+}
+
 function drawSun(){
     //sun
     sunX = map(time, sunrise, sunset, risePoint, setPoint);
@@ -343,7 +360,7 @@ function drawDrops(isSnow){
 
 function Drop() {
     this.x = random(width/4,width/4*3);
-    this.y = random(height/3,height);
+    this.y = random(height/3,seaLevel);
     this.offset = random(-30,30);
     this.opacity;
     this.isSnow = true;
@@ -367,13 +384,36 @@ function Drop() {
     };
 }
 
+function drawStars(){
+    for (var i=0; i<stars.length; i++) {
+        stars[i].twinkle();
+    }
+}
+
+function Star() {
+    this.x = random(width/8,width/8*7);
+    this.y = random(height/8,height/2);
+    this.opacity=200;
+    this.size = random(1, 3);
+    this.twinkle = function(){
+        if(random(0,2)<1){
+            this.opacity+=random(-30,30);
+            this.opacity=constrain(this.opacity,0,255);
+        }
+        fill(255,this.opacity-starDisplay);
+        ellipse(this.x, this.y, this.size, this.size);
+    }
+}
+
 function checkCondition(code){
     imageMode(CORNER);
-    if(['31','32','33','34','36'].indexOf(code)>=0){
+    if(['23','24','31','32','33','34','36'].indexOf(code)>=0){
         //clear
         //clear bg
         //draw sun
         background(bgImg);
+        drawLights();
+        drawStars();
         drawSun();
     }else if(['26','27','28'].indexOf(code)>=0){
         //heavy cloud
@@ -382,6 +422,7 @@ function checkCondition(code){
         //draw sun
         background(bgImgAlt);
         drawCloud();
+        drawLights();
         drawSun();
     }else if(['29','30','44'].indexOf(code)>=0){
         //light cloudy
@@ -390,6 +431,8 @@ function checkCondition(code){
         //draw sun
         background(bgImg);
         drawCloud();
+        drawLights();
+        drawStars();
         drawSun();
     }else if( ['5','6','7','13','14','15','16','17','18','41','42','43','46','5','6','7','35'].indexOf(code)>=0){
         //snow
@@ -399,14 +442,18 @@ function checkCondition(code){
         //draw snow
         background(bgImgAlt);
         drawCloud();
-        drawSun();
         drawDrops(true);
-    }else if( ['19','20','21','22','23','24','25'].indexOf(code)>=0){
+        drawLights();
+        drawSun();
+
+    }else if( ['19','20','21','22','25'].indexOf(code)>=0){
         //foggy
         //alt bg
         //draw sun
         background(bgImgAlt);
+        drawLights();
         drawSun();
+
 
     }else if(['0', '1', '2','3','4','8','9','10','11','12','37','38','38','39','40','45','47'].indexOf(code) >= 0){
         //rain
@@ -416,10 +463,15 @@ function checkCondition(code){
         //draw rain
         background(bgImgAlt);
         drawCloud();
-        drawSun();
         drawDrops(false);
+        drawLights();
+        drawSun();
+
     }else {
         background(bgImg);
+        drawLights();
         drawSun();
+        drawStars();
+
     }
 }
