@@ -176,7 +176,7 @@ function setup() {
 
     morningLight=constrain(map(time, sunrise-3600,36000, 255, 0),0,220);
     eveningLight=constrain(map(time, 50400, sunset+3600, 0, 255),0,220);//bright hours:10-2pm
-    starDisplay =constrain(map(sq(time/3600-12), 64, 16, 0, 255),0,255);
+
 
     for(i=0; i<200;i++){
         drops.push(new Drop());
@@ -207,7 +207,6 @@ function draw() {
     seaLevel = height / 8 * 5;
     morningLight=constrain(map(time, sunrise-3600,36000, 255, 0),0,220);
     eveningLight=constrain(map(time, 50400, sunset+3600, 0, 255),0,220);
-    starDisplay =constrain(map(sq(time/3600-12), 64, 16, 0, 255),0,255);
 
 
     checkCondition(code);
@@ -264,6 +263,7 @@ function windowResized() {
     risePoint = width / 6;
     setPoint = width - risePoint;
     seaLevel = height / 8 * 5;
+
 }
 
 function checkTime(i) {
@@ -296,6 +296,7 @@ function getHour(){
         currentH = date.getUTCHours()-timezone;
     }
     current = (currentH)* 60 * 60 + date.getUTCMinutes() * 60 + date.getSeconds();
+
 
 }
 
@@ -385,6 +386,7 @@ function Drop() {
 }
 
 function drawStars(){
+    starDisplay =constrain(map(sq(time/3600-12), 64, 16, 0, 255),0,255);
     for (var i=0; i<stars.length; i++) {
         stars[i].twinkle();
     }
