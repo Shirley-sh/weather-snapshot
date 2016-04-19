@@ -395,6 +395,9 @@ function drawStars(){
 function Star() {
     this.x = random(width/8,width/8*7);
     this.y = random(height/8,height/2);
+    this.r = random(200,255);
+    this.g = random(200,255);
+    this.b = random(200,255);
     this.opacity=200;
     this.size = random(1, 3);
     this.twinkle = function(){
@@ -402,7 +405,7 @@ function Star() {
             this.opacity+=random(-30,30);
             this.opacity=constrain(this.opacity,0,255);
         }
-        fill(255,this.opacity-starDisplay);
+        fill(this.r, this.g, this.b,this.opacity-starDisplay);
         ellipse(this.x, this.y, this.size, this.size);
     }
 }
