@@ -10,8 +10,6 @@ var isF = true;
 var isSnow = false;
 var timezone = -9;
 
-setTimeout(function () {   window.scrollTo(0, 1); }, 1000);
-
 if ("geolocation" in navigator) {
     $('#get-loc').show();
 } else {
