@@ -374,6 +374,7 @@ function Drop() {
             this.x = random(width/4,width/4*3);
         }
         fill(255,this.opacity);
+        noStroke();
         if(this.isSnow){
             ellipse(this.x, this.y, this.size, this.size);
         }else {
