@@ -12,6 +12,7 @@ var timezone = -9;
 
 if ("geolocation" in navigator) {
     $('#get-loc').show();
+    
 } else {
     $('#get-loc').css("opacity", 0);
 }
