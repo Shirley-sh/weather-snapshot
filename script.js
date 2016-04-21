@@ -211,6 +211,8 @@ function draw() {
 
 
     checkCondition(code);
+    fill(0);
+    rect(0,seaLevel-0.66*size,width,height);
 
     //sunrise and sunset
     strokeWeight(1);
@@ -318,8 +320,7 @@ function drawLights(){
     rect(0, 0, width, height);
     fill(180, 0, 100, eveningLight/10);
     rect(0, 0, width, height);
-    fill(0);
-    rect(0,seaLevel-0.66*size,width,height);
+
 }
 
 function drawSun(){
@@ -369,7 +370,7 @@ function Drop() {
     this.size = size/10+random(0, 2);
     this.move = function() {
         this.y += this.offset/20+4;
-        this.opacity = map(this.y,height/3,seaLevel,255,0)+this.offset;
+        this.opacity = map(this.y,height/3,seaLevel,200,0)+this.offset;
         if(this.y>height){
             this.y=height/3+random(40,100);
             this.x = random(width/4,width/4*3);
@@ -470,8 +471,9 @@ function checkCondition(code){
         //draw rain
         background(bgImgAlt);
         drawCloud();
-        drawDrops(false);
+
         drawLights();
+        drawDrops(false);
         drawSun();
 
     }else {
