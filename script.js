@@ -1,14 +1,27 @@
 /**
  * Created by Shirley on 3/2/16.
- */
+//  */
+// $(document).ready(function () {
 
-var sunrise, sunset, sunriseText, sunsetText, time, condition, code, morningLight,
-        eveningLight,city,tempF,tempC, current,msg,seaLevel,today,starDisplay;
+
+var time, morningLight, latitude, longitude, eveningLight, current,msg,seaLevel,starDisplay;
 var drops = [];
 var stars = [];
 var isF = true;
 var isSnow = false;
-var timezone = -9;
+var timezone = 0;
+var date = new Date();
+
+var today = "";
+var city = "";
+var condition = "Loading...";
+var tempC = "--";
+var tempF = "--";
+var code = "";
+var sunriseText = "Sunrise";
+var sunsetText = "Sunset";
+var sunrise = 21600;
+var sunset = 64800;
 
 if ("geolocation" in navigator) {
     $('#get-loc').show();
@@ -17,73 +30,16 @@ if ("geolocation" in navigator) {
     $('#get-loc').css("opacity", 0);
 }
 
-$('#get-loc').on('click', function() {
+$.getJSON('https://freegeoip.net/json/').done (function(location) {
+    city=location.city;
+    latitude=location.latitude;
+    longitude=location.longitude;
+    console.log(city+latitude+','+longitude);
+    loadWeather(latitude+','+longitude);
     timezone = date.getTimezoneOffset()/60;
-    getHour();
-    resetAnimation();
-    navigator.geolocation.getCurrentPosition(function(position) {
-        loadWeather(position.coords.latitude+','+position.coords.longitude); //load weather using your lat/lng coordinates
-    });
-    document.getElementById("condition").textContent = "Loading...";
-    document.getElementById("location").textContent = "Loading...";
-    setGreetings();
-    $('#get-loc').css("opacity", 0);
-    console.log("city: " + city + " condition:" + condition+ " code:" +code);
+    time = 0;
 });
 
-$('#shanghai').on('click', function() {
-    timezone = -8;
-    getHour();
-    resetAnimation();
-    loadWeather("Shanghai",2151849);
-    document.getElementById("condition").textContent = "Loading...";
-    document.getElementById("location").textContent = "Loading...";
-    setGreetings();
-    document.querySelector("#skyline img").src = "images/shanghai.png";
-    $('#get-loc').css("opacity", 1);
-    console.log("city: " + city + " condition:" + condition+ " code:" +code);
-
-});
-
-$('#new-york').on('click', function() {
-    timezone = 4;
-    getHour();
-    resetAnimation();
-    loadWeather("New York",	12761335);
-    document.getElementById("condition").textContent = "Loading...";
-    document.getElementById("location").textContent = "Loading...";
-    setGreetings();
-    document.querySelector("#skyline img").src = "images/newyork2.png";
-    $('#get-loc').css("opacity", 1);
-    console.log("city: " + city + " condition:" + condition+ " code:" +code);
-
-});
-
-$('#abu-dhabi').on('click', function() {
-    timezone = -4;
-    getHour();
-    resetAnimation();
-    loadWeather("Abu Dhabi",1940330);
-    document.getElementById("condition").textContent = "Loading...";
-    document.getElementById("location").textContent = "Loading...";
-    setGreetings();
-    document.querySelector("#skyline img").src = "images/abudhabi2.png";
-    $('#get-loc').css("opacity", 1);
-    console.log("city: " + city + " condition:" + condition+ " code:" +code);
-
-});
-
-$('#unit').on('click',function(){
-    isF = !isF;
-    if(isF){
-        document.getElementById("temp").textContent = tempF+"℉";
-        document.getElementById("unit").textContent = "/℃";
-
-    }else {
-        document.getElementById("temp").textContent = tempC+"℃";
-        document.getElementById("unit").textContent = "/℉";
-    }
-});
 
 function loadWeather(location, woeid) {
     $.simpleWeather({
@@ -130,28 +86,9 @@ function loadWeather(location, woeid) {
     });
 }
 
-$.simpleWeather({
-    location: 'Tokyo',
-    unit: 'f',
-    success: function (weather) {
-        today = weather.forecast[0].date;
-        city = weather.city;
-        condition = weather.currently;
-        tempC = weather.alt.temp;
-        tempF = weather.temp;
-        code = weather.code;
-        sunriseText = weather.sunrise;
-        sunsetText = weather.sunset;
-        sunrise = convertTime(weather.sunrise);
-        sunset = convertTime(weather.sunset);
-    }
-});
-
 
 function setup() {
     frameRate(20);
-    date = new Date();
-
     getHour();
     resetAnimation();
     setGreetings();
@@ -167,8 +104,8 @@ function setup() {
     }else {
         size=windowWidth/15;
     }
-    seaLevel = windowHeight / 8 * 5;
-    $("#skyline").height(seaLevel-0.66*size);
+    seaLevel = windowHeight*0.7;
+    $("#skyline").height(seaLevel-0.66*size+1);
 
 
     bgImg = loadImage("images/background.jpg");
@@ -205,7 +142,7 @@ function draw() {
 
     risePoint = width / 6;
     setPoint = width - risePoint;
-    seaLevel = height / 8 * 5;
+    seaLevel = height*0.7;
     morningLight=constrain(map(time, sunrise-3600,36000, 255, 0),0,220);
     eveningLight=constrain(map(time, 50400, sunset+3600, 0, 255),0,220);
 
@@ -299,8 +236,6 @@ function getHour(){
         currentH = date.getUTCHours()-timezone;
     }
     current = (currentH)* 60 * 60 + date.getUTCMinutes() * 60 + date.getSeconds();
-
-
 }
 
 function resetAnimation(){
@@ -484,3 +419,73 @@ function checkCondition(code){
 
     }
 }
+
+$('#get-loc').on('click', function() {
+    timezone = date.getTimezoneOffset()/60;
+    getHour();
+    resetAnimation();
+    navigator.geolocation.getCurrentPosition(function(position) {
+        loadWeather(position.coords.latitude+','+position.coords.longitude); //load weather using your lat/lng coordinates
+    });
+    document.getElementById("condition").textContent = "Loading...";
+    document.getElementById("location").textContent = "Loading...";
+    setGreetings();
+    $('#get-loc').css("opacity", 0);
+    console.log("city: " + city + " condition:" + condition+ " code:" +code);
+});
+
+$('#shanghai').on('click', function() {
+    timezone = -8;
+    getHour();
+    resetAnimation();
+    loadWeather("Shanghai",2151849);
+    document.getElementById("condition").textContent = "Loading...";
+    document.getElementById("location").textContent = "Loading...";
+    setGreetings();
+    document.querySelector("#skyline img").src = "images/shanghai.png";
+    $('#get-loc').css("opacity", 1);
+    console.log("city: " + city + " condition:" + condition+ " code:" +code);
+
+});
+
+$('#new-york').on('click', function() {
+    timezone = 4;
+    getHour();
+    resetAnimation();
+    loadWeather("New York",	12761335);
+    document.getElementById("condition").textContent = "Loading...";
+    document.getElementById("location").textContent = "Loading...";
+    setGreetings();
+    document.querySelector("#skyline img").src = "images/newyork2.png";
+    $('#get-loc').css("opacity", 1);
+    console.log("city: " + city + " condition:" + condition+ " code:" +code);
+
+});
+
+$('#abu-dhabi').on('click', function() {
+    timezone = -4;
+    getHour();
+    resetAnimation();
+    loadWeather("Abu Dhabi",1940330);
+    document.getElementById("condition").textContent = "Loading...";
+    document.getElementById("location").textContent = "Loading...";
+    setGreetings();
+    document.querySelector("#skyline img").src = "images/abudhabi2.png";
+    $('#get-loc').css("opacity", 1);
+    console.log("city: " + city + " condition:" + condition+ " code:" +code);
+
+});
+
+$('#unit').on('click',function(){
+    isF = !isF;
+    if(isF){
+        document.getElementById("temp").textContent = tempF+"℉";
+        document.getElementById("unit").textContent = "/℃";
+
+    }else {
+        document.getElementById("temp").textContent = tempC+"℃";
+        document.getElementById("unit").textContent = "/℉";
+    }
+});
+
+// })

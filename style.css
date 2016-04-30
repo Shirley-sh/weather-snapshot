@@ -188,4 +188,9 @@ footer > p{
     opacity: 0.5;
     font-size: 0.3em;
 }
-
+/*width less than 640px*/
+@media screen and (max-width: 640px) {
+    #shanghai,#new-york,#abu-dhabi{
+        display: none;
+    }
+}
