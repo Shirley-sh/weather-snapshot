@@ -38,6 +38,8 @@ $.getJSON('https://freegeoip.net/json/').done (function(location) {
     loadWeather(latitude+','+longitude);
     timezone = date.getTimezoneOffset()/60;
     time = 0;
+    getHour();
+    setGreetings();
 });
 
 
@@ -89,9 +91,8 @@ function loadWeather(location, woeid) {
 
 function setup() {
     frameRate(20);
-    getHour();
+    // getHour();
     resetAnimation();
-    setGreetings();
 
     document.getElementById("condition").textContent = condition;
     document.getElementById("location").textContent = city;
@@ -220,14 +221,16 @@ function setGreetings(){
         msg = "Good Afternoon";
     }else if((currentH)>=18){
         msg = "Good Evening";
-    }else {
+    }else if(currentH<=4){
         msg = "Greetings Night Owl";
+    }else{
+        msg = "Hello";
     }
-
     document.getElementById("greeting").textContent = msg;
 }
 
 function getHour(){
+    console.log("UTC"+date.getUTCHours());
     if(date.getUTCHours()-timezone>=24){
         currentH = date.getUTCHours()-timezone-24;
     }else if(date.getUTCHours()-timezone<0) {
@@ -236,6 +239,7 @@ function getHour(){
         currentH = date.getUTCHours()-timezone;
     }
     current = (currentH)* 60 * 60 + date.getUTCMinutes() * 60 + date.getSeconds();
+    setGreetings();
 }
 
 function resetAnimation(){
@@ -429,7 +433,6 @@ $('#get-loc').on('click', function() {
     });
     document.getElementById("condition").textContent = "Loading...";
     document.getElementById("location").textContent = "Loading...";
-    setGreetings();
     $('#get-loc').css("opacity", 0);
     console.log("city: " + city + " condition:" + condition+ " code:" +code);
 });
@@ -441,7 +444,6 @@ $('#shanghai').on('click', function() {
     loadWeather("Shanghai",2151849);
     document.getElementById("condition").textContent = "Loading...";
     document.getElementById("location").textContent = "Loading...";
-    setGreetings();
     document.querySelector("#skyline img").src = "images/shanghai.png";
     $('#get-loc').css("opacity", 1);
     console.log("city: " + city + " condition:" + condition+ " code:" +code);
@@ -455,7 +457,6 @@ $('#new-york').on('click', function() {
     loadWeather("New York",	12761335);
     document.getElementById("condition").textContent = "Loading...";
     document.getElementById("location").textContent = "Loading...";
-    setGreetings();
     document.querySelector("#skyline img").src = "images/newyork2.png";
     $('#get-loc').css("opacity", 1);
     console.log("city: " + city + " condition:" + condition+ " code:" +code);
@@ -469,7 +470,6 @@ $('#abu-dhabi').on('click', function() {
     loadWeather("Abu Dhabi",1940330);
     document.getElementById("condition").textContent = "Loading...";
     document.getElementById("location").textContent = "Loading...";
-    setGreetings();
     document.querySelector("#skyline img").src = "images/abudhabi2.png";
     $('#get-loc').css("opacity", 1);
     console.log("city: " + city + " condition:" + condition+ " code:" +code);
