@@ -55,8 +55,8 @@ function loadWeather(location, woeid) {
             tempC = weather.alt.temp;
             tempF = weather.temp;
             code = weather.code;
-            sunriseText = weather.sunrise;
-            sunsetText = weather.sunset;
+            sunriseText = convertTimeText(weather.sunrise);
+            sunsetText = convertTimeText(weather.sunset);
             sunrise = convertTime(weather.sunrise);
             sunset = convertTime(weather.sunset);
             document.getElementById("condition").textContent = condition;
@@ -192,6 +192,22 @@ function convertTime(str) {
     }
 }
 
+function convertTimeText(str) {
+    var parts, noon, t, h, m;
+    if (str.length > 10) {
+        parts = str.split(" ");
+        noon = parts[5];
+        t = parts[4];
+    } else {
+        parts = str.split(" ");
+        t = parts[0].split(":");
+        noon = parts[1];
+    }
+    h = ("0" + t[0] ).slice(-2);
+    m = ("0" + t[1] ).slice(-2);
+
+    return h+":"+m+" "+ noon.toUpperCase();
+}
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
